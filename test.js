@@ -1,5 +1,82 @@
+//Track when the page has been reloaded or loaded..
+window.onload = function(){
+
+		let usersInfo = document.querySelector("#users-info");
+
+		//look into the localStorage..
+		//get the users' data 
+		//display on page
+		//
+		
+
+		let users = localStorage.getItem('user');
+
+		if(users == null || users == undefined){
+
+			//there are no users..
+			usersInfo.innerHTML = "No user registered";
+
+		}else{
+
+			//there is user in localStorage
+			users = JSON.parse(users);
+
+			if(users.length == 0){
+				//there are no users..
+				usersInfo.innerHTML = "No user registered";
+			}else{
+
+				let usersTable = "<table>";
+					usersTable += "<thead> <tr> <th>Name</th> <th>Email</th></tr> </thead>";
+					usersTable += "<body>";
+
+				for(let i = 0; i < users.length; i++){
+
+					userName = users[i]['name'];
+					userEmail = users[i]['email'];
+
+					usersTable += "<tr><td>"+userName+"</td><td>"+userEmail+"</td></tr>";
+
+
+
+				}
+
+					usersTable += "</body></table>";
+
+
+					//append the table to the usersInfo 
+					
+					usersInfo.innerHTML = usersTable;
+
+
+
+			}
+
+		}
+
+
+}
+
+
+
+
+
+
+
+
+
 //get the element id
 const root = document.getElementById("root");
+
+
+//create element for info
+//let pageInfo = document.createElement("div");
+
+//create element for holding users
+let usersDiv = document.createElement("div");
+	usersDiv.id = "users-info";
+
+
 
 let form = document.createElement('form');
 	//form.method = "POST";
@@ -42,7 +119,8 @@ let removeButton = document.createElement("button");
 		let name = document.getElementById("name-id").value;
 		let email = document.getElementById("email-id").value;
 
-		//check if users exist already
+		//dont forget to check if the user exists already
+		
 		
 		//get the stored items from localStorage
 		let stored_users = localStorage.getItem("user");
@@ -52,22 +130,62 @@ let removeButton = document.createElement("button");
 		if(stored_users == null || stored_users == undefined){
 			//create an empty array that will hold the users
 			stored_users = [];
+
+			//create user object
+			let user = {
+					'name' : name,
+					'email' : email
+			}
+
+			stored_users.push(user);   
+
+			stored_users = JSON.stringify(stored_users);
+
+			localStorage.setItem('user', stored_users);
+			alert("User registered");
+
+			//reload the page
+			location.reload();
 		}else{
 			//users exist.. parse the stored_users
 			stored_users = JSON.parse(stored_users);
+
+			//check if the user has been registered before
+			let users_found = [];
+			for(let i = 0; i < stored_users.length; i++){
+
+				if(stored_users[i]['email'] == email){
+					//there is a match
+					//we cant allow user register
+					users_found.push(email);
+					break;
+				}
+			}
+
+			if(users_found.length > 0){
+				//there is a user in the array
+				alert("User registered already!");
+			}else{
+				//create a user object
+				let user = {
+					'name' : name,
+					'email' : email
+				}
+
+				stored_users.push(user);   
+
+				stored_users = JSON.stringify(stored_users);
+
+				localStorage.setItem('user', stored_users);
+				
+				//reload the page
+				location.reload();
+			}
+
+
 		}
 
-		//create a user object
-		let user = {
-			'name' : name,
-			'email' : email
-		}
-
-		stored_users.push(user)
-
-		stored_users = JSON.stringify(stored_users);
-
-		localStorage.setItem('user', stored_users);
+		
 	}
 
 
@@ -75,31 +193,42 @@ let removeButton = document.createElement("button");
 	removeButton.onclick = function(){
 		let email = document.getElementById("email-id").value;
 
-		console.log(email);
+		
 
-		//remove any user with this email address
-		let stored_users = localStorage.getItem("user");
+		if(confirm("Do you want to delete?")){
 
-		if(stored_users){
-			stored_users = JSON.parse(stored_users);
+			//remove any user with this email address
+			let stored_users = localStorage.getItem("user");
 
-			for(let i = 0; i < stored_users.length; i++){
+			if(stored_users){
+				stored_users = JSON.parse(stored_users);
 
-				if(stored_users[i]['email'] == email){
-					//there is a match.. 
-					stored_users.splice(i, 1);
+				for(let i = 0; i < stored_users.length; i++){
 
-					stored_users = JSON.stringify(stored_users);
+					if(stored_users[i]['email'] == email){
+						//there is a match.. 
+						stored_users.splice(i, 1);
 
-					localStorage.setItem("user", stored_users);
+						stored_users = JSON.stringify(stored_users);
 
-					alert("User deleted!");
+						localStorage.setItem("user", stored_users);
 
-					//break
+						alert("User deleted!");
+
+						//break
+						
+
+						//reload the page
+						location.reload();
+					}
+
 				}
-
 			}
+
+
 		}
+
+		
 
 	}
 
@@ -117,6 +246,7 @@ form.appendChild(removeButton);
 
 //attach the form to root
 root.appendChild(form);
+root.appendChild(usersDiv);
 
 
 
